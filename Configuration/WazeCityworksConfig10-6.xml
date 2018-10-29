@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<template productVersion="10.6.0">
+  <geoEventServices>
+    <geoEventService name="b2fa6e35-a098-4362-89f8-4edca29582df" label="Waze-Alerts-Cityworks" description="" lineStyle="Diagonal" runningState="STARTED" statusDetails="">
+      <inputs>
+        <input ref="d6ee0b49-4329-4e64-8289-c295dfac0a9c" label="waze-in-na" left="235" top="178" width="87.011364" height="39.011364" />
+      </inputs>
+      <outputs>
+        <output ref="409a0e6a-ac96-46e8-8ccc-e2633dbff179" label="http-message-out-road-kill-post" left="861" top="178" width="200.01136400000001" height="39.011364" />
+        <output ref="97377a69-c147-4480-8f48-3cd4fa964208" label="http-message-out-missing-signs-post" left="861" top="266" width="200.01136400000001" height="49.011364" />
+        <output ref="2fa737d6-8107-49ba-81b9-3e9ddb4f3bcc" label="http-message-out-pot-holes-post" left="861" top="86" width="200.01136400000001" height="49.011364" />
+      </outputs>
+      <nodes>
+        <node name="8973c327-c68f-4a59-8abd-7fb5df1e36a7" label="Reliability" left="369" top="170" width="93" height="62">
+          <filter>
+            <logicalCondition operator="AND">
+              <attributeCondition operand="reliability" operator="&gt;=" value="2" />
+            </logicalCondition>
+          </filter>
+        </node>
+        <node name="23c5df69-4526-4b28-8387-986b197df874" label="Limit 1 Event Per Track" left="499" top="178" width="145.01136400000001" height="39.011364">
+          <processor uri="com.esri.geoevent.solutions.processor.evc/EVCProcessor/10.5.0">
+            <properties>
+              <property name="interval" type="Long">86400000</property>
+              <property name="filterType" type="String">maxPerInterval</property>
+              <property name="epi" type="Long">1</property>
+            </properties>
+          </processor>
+        </node>
+        <node name="0454e6a0-02a2-4554-8e96-6d3091dc0eb8" label="Pot Hole" left="690" top="83" width="83" height="62">
+          <filter>
+            <logicalCondition operator="AND">
+              <attributeCondition operand="subtype" operator="=" value="HAZARD_ON_ROAD_POT_HOLE" />
+            </logicalCondition>
+          </filter>
+        </node>
+        <node name="a8e4deac-620e-4b20-85fd-9d2d461d4679" label="Road Kill" left="687" top="170" width="83" height="62">
+          <filter>
+            <logicalCondition operator="AND">
+              <attributeCondition operand="subtype" operator="=" value="HAZARD_ON_ROAD_ROAD_KILL" />
+            </logicalCondition>
+          </filter>
+        </node>
+        <node name="dbf96e4a-84d1-44e6-8ea8-4ff7ef3bc072" label="Sign Missing" left="690" top="263" width="83" height="62">
+          <filter>
+            <logicalCondition operator="AND">
+              <attributeCondition operand="subtype" operator="=" value="HAZARD_ON_SHOULDER_MISSING_SIGN" />
+            </logicalCondition>
+          </filter>
+        </node>
+      </nodes>
+      <flow>
+        <from ref="d6ee0b49-4329-4e64-8289-c295dfac0a9c" label="waze-in-na">
+          <to ref="8973c327-c68f-4a59-8abd-7fb5df1e36a7" label="Reliability" />
+        </from>
+        <from ref="8973c327-c68f-4a59-8abd-7fb5df1e36a7" label="Reliability">
+          <to ref="23c5df69-4526-4b28-8387-986b197df874" label="Limit 1 Event Per Track" />
+        </from>
+        <from ref="23c5df69-4526-4b28-8387-986b197df874" label="Limit 1 Event Per Track">
+          <to ref="a8e4deac-620e-4b20-85fd-9d2d461d4679" label="Road Kill" />
+          <to ref="0454e6a0-02a2-4554-8e96-6d3091dc0eb8" label="Pot Hole" />
+          <to ref="dbf96e4a-84d1-44e6-8ea8-4ff7ef3bc072" label="Sign Missing" />
+        </from>
+        <from ref="0454e6a0-02a2-4554-8e96-6d3091dc0eb8" label="Pot Hole">
+          <to ref="2fa737d6-8107-49ba-81b9-3e9ddb4f3bcc" label="http-message-out-pot-holes-post" />
+        </from>
+        <from ref="dbf96e4a-84d1-44e6-8ea8-4ff7ef3bc072" label="Sign Missing">
+          <to ref="97377a69-c147-4480-8f48-3cd4fa964208" label="http-message-out-missing-signs-post" />
+        </from>
+        <from ref="a8e4deac-620e-4b20-85fd-9d2d461d4679" label="Road Kill">
+          <to ref="409a0e6a-ac96-46e8-8ccc-e2633dbff179" label="http-message-out-road-kill-post" />
+        </from>
+      </flow>
+      <geoEventsReceivedRateRange max="0.0" min="0.0" />
+      <geoEventsSentRateRange max="0.0" min="0.0" />
+    </geoEventService>
+  </geoEventServices>
+  <inputs>
+    <input clusterCommand="STOP" connector="receive-waze-connector" connectorLabel="Receive Waze Connected Citizens Program Feed" hostName="CSC-JOYNER7D3" label="waze-in-na" name="d6ee0b49-4329-4e64-8289-c295dfac0a9c" runningState="STOPPED" statusDetails="NULL" supportsAllGeoEventDefinitions="true">
+      <adapter uri="com.esri.geoevent.adapter.inbound/Waze/10.5.0" />
+      <geoEventDefinitionHistory />
+      <geoEventsRateRange max="0.0" min="0.0" />
+      <supportedGeoEventDefinitions />
+      <transport uri="com.esri.geoevent.transport.inbound/Waze/10.5.0">
+        <properties>
+          <property name="acceptableMimeTypesServerMode" type="String"></property>
+          <property name="serviceURL" type="String">https://na-georss.waze.com/rtserver/web/TGeoRSS</property>
+          <property name="acceptableMimeTypesClientMode" type="String">application/json</property>
+          <property name="httpMethod" type="String">GET</property>
+          <property name="frequency" type="Integer">60</property>
+          <property name="mode" type="String">CLIENT</property>
+          <property name="honorLastModified" type="Boolean">true</property>
+          <property name="useClientURLProxy" type="Boolean">false</property>
+          <property name="clientParameters" type="String"></property>
+          <property name="headers" type="String">name:value</property>
+          <property name="getRequestRawDataFieldName" type="String"></property>
+          <property name="types" type="String">alerts</property>
+          <property name="clientURL" type="String">https://na-georss.waze.com/rtserver/web/TGeoRSS</property>
+          <property name="httpAppendToEnd" type="String"></property>
+          <property name="postContentType" type="String">application/x-www-form-urlencoded</property>
+          <property name="clientPostBody" type="String"></property>
+          <property name="httpTimeoutValue" type="Integer">30</property>
+          <property name="useLongPolling" type="Boolean">false</property>
+          <property name="clientURLProxy" type="String"></property>
+          <property name="token" type="String">ccp_partner</property>
+          <property name="clientPostFrom" type="String">TEXT</property>
+          <property name="clientPostParameters" type="String">name:value</property>
+          <property name="aoi" type="String">-118.451950589,33.8335267285;-118.059002277,33.8335267285;-118.058064966,33.6870493432;-118.451950589,33.6870493432;-118.451950589,33.8335267285</property>
+          <property name="getRequestIncludesRaw" type="Boolean">true</property>
+          <property name="username" type="String">REPLACE</property>
+        </properties>
+      </transport>
+    </input>
+  </inputs>
+  <outputs>
+    <output clusterCommand="START" connector="esri-messageformatter-http-external-out" connectorLabel="Push Message Formatter Output via POST" label="http-message-out-road-kill-post" name="409a0e6a-ac96-46e8-8ccc-e2633dbff179" runningState="STARTED" statusDetails="NULL" supportsAllGeoEventDefinitions="true">
+      <adapter uri="com.esri.ges.adapter.outbound/MessageFormatter/10.6.0">
+        <properties>
+          <property name="textMessage" type="String">data= {
+ "ProblemSid": "8794",
+ "X": "${location.x}",
+ "Y": "${location.y}",
+ "CallerLastName": "Waze",
+ "CallerComments": "Waze",
+ "Details": "${subtype}"
+}</property>
+        </properties>
+      </adapter>
+      <geoEventDefinitionHistory />
+      <geoEventsRateRange max="0.0" min="0.0" />
+      <supportedGeoEventDefinitions />
+      <transport uri="com.esri.ges.transport.outbound/HTTP/10.6.0">
+        <properties>
+          <property name="mode" type="String">CLIENT</property>
+          <property name="headers" type="String"></property>
+          <property name="clientURL" type="String">https://cloud01.cityworks.com/_DEMO_KSMMS_15-2_LongBeach/services/AMS/ServiceRequest/create?token=eyJFbXBsb3llZVNpZCI6ODEwMywiSXNzdWVkVGltZSI6MTUwOTU0NjUwNzczNCwiTG9naW5OYW1lIjoiU1RSRUVUUyIsIlNpZ25hdHVyZSI6InhKekY4MnpWR2h4dnJobjd1MlVzcUJhbStiZ3dtQ1Fyd3EwOFVkZlVnK2s9IiwiVG9rZW4iOiJzalJqZTVTV1RBSVhEUlpVZU0ycXo4L1VJb2wzUWdJVGNnbjNIdm1YV2NFPSJ9</property>
+          <property name="useClientURLProxy" type="Boolean">false</property>
+          <property name="clientParameters" type="String"></property>
+          <property name="postContentType" type="String">application/x-www-form-urlencoded</property>
+          <property name="acceptableMimeTypesClientMode" type="String">application/json</property>
+          <property name="httpMethod" type="String">POST</property>
+          <property name="httpTimeoutValue" type="Integer">60</property>
+          <property name="clientURLProxy" type="String"></property>
+        </properties>
+      </transport>
+    </output>
+    <output clusterCommand="START" connector="esri-messageformatter-http-external-out" connectorLabel="Push Message Formatter Output via POST" label="http-message-out-missing-signs-post" name="97377a69-c147-4480-8f48-3cd4fa964208" runningState="STARTED" statusDetails="NULL" supportsAllGeoEventDefinitions="true">
+      <adapter uri="com.esri.ges.adapter.outbound/MessageFormatter/10.6.0">
+        <properties>
+          <property name="textMessage" type="String">data= {
+ "ProblemSid": "2641",
+ "X": "${location.x}",
+ "Y": "${location.y}",
+ "CallerLastName": "Waze",
+ "CallerComments": "Waze",
+ "Details": "${subtype}"
+}</property>
+        </properties>
+      </adapter>
+      <geoEventDefinitionHistory />
+      <geoEventsRateRange max="0.0" min="0.0" />
+      <supportedGeoEventDefinitions />
+      <transport uri="com.esri.ges.transport.outbound/HTTP/10.6.0">
+        <properties>
+          <property name="mode" type="String">CLIENT</property>
+          <property name="headers" type="String"></property>
+          <property name="clientURL" type="String">https://cloud01.cityworks.com/_DEMO_KSMMS_15-2_LongBeach/services/AMS/ServiceRequest/create?token=eyJFbXBsb3llZVNpZCI6ODEwMywiSXNzdWVkVGltZSI6MTUwOTU0NjUwNzczNCwiTG9naW5OYW1lIjoiU1RSRUVUUyIsIlNpZ25hdHVyZSI6InhKekY4MnpWR2h4dnJobjd1MlVzcUJhbStiZ3dtQ1Fyd3EwOFVkZlVnK2s9IiwiVG9rZW4iOiJzalJqZTVTV1RBSVhEUlpVZU0ycXo4L1VJb2wzUWdJVGNnbjNIdm1YV2NFPSJ9</property>
+          <property name="useClientURLProxy" type="Boolean">false</property>
+          <property name="clientParameters" type="String"></property>
+          <property name="postContentType" type="String">application/x-www-form-urlencoded</property>
+          <property name="acceptableMimeTypesClientMode" type="String">application/json</property>
+          <property name="httpMethod" type="String">POST</property>
+          <property name="httpTimeoutValue" type="Integer">60</property>
+          <property name="clientURLProxy" type="String"></property>
+        </properties>
+      </transport>
+    </output>
+    <output clusterCommand="START" connector="esri-messageformatter-http-external-out" connectorLabel="Push Message Formatter Output via POST" label="http-message-out-pot-holes-post" name="2fa737d6-8107-49ba-81b9-3e9ddb4f3bcc" runningState="STARTED" statusDetails="NULL" supportsAllGeoEventDefinitions="true">
+      <adapter uri="com.esri.ges.adapter.outbound/MessageFormatter/10.6.0">
+        <properties>
+          <property name="textMessage" type="String">data= {
+ "ProblemSid": "276",
+ "X": "${location.x}",
+ "Y": "${location.y}",
+ "CallerLastName": "Waze",
+ "CallerComments": "Waze",
+ "Details": "${subtype}"
+}</property>
+        </properties>
+      </adapter>
+      <geoEventDefinitionHistory />
+      <geoEventsRateRange max="0.0" min="0.0" />
+      <supportedGeoEventDefinitions />
+      <transport uri="com.esri.ges.transport.outbound/HTTP/10.6.0">
+        <properties>
+          <property name="mode" type="String">CLIENT</property>
+          <property name="headers" type="String"></property>
+          <property name="clientURL" type="String">https://cloud01.cityworks.com/_DEMO_KSMMS_15-2_LongBeach/services/AMS/ServiceRequest/create?token=eyJFbXBsb3llZVNpZCI6ODEwMywiSXNzdWVkVGltZSI6MTUwOTU0NjUwNzczNCwiTG9naW5OYW1lIjoiU1RSRUVUUyIsIlNpZ25hdHVyZSI6InhKekY4MnpWR2h4dnJobjd1MlVzcUJhbStiZ3dtQ1Fyd3EwOFVkZlVnK2s9IiwiVG9rZW4iOiJzalJqZTVTV1RBSVhEUlpVZU0ycXo4L1VJb2wzUWdJVGNnbjNIdm1YV2NFPSJ9</property>
+          <property name="useClientURLProxy" type="Boolean">false</property>
+          <property name="clientParameters" type="String"></property>
+          <property name="postContentType" type="String">application/x-www-form-urlencoded</property>
+          <property name="acceptableMimeTypesClientMode" type="String">application/json</property>
+          <property name="httpMethod" type="String">POST</property>
+          <property name="httpTimeoutValue" type="Integer">60</property>
+          <property name="clientURLProxy" type="String"></property>
+        </properties>
+      </transport>
+    </output>
+  </outputs>
+  <tags />
+  <connectors>
+    <connector accessType="editable" label="Receive Waze Connected Citizens Program Feed" name="receive-waze-connector" type="inbound">
+      <adapter uri="com.esri.geoevent.adapter.inbound/Waze/10.5.0" />
+      <defaultName>waze-in</defaultName>
+      <description>Connects to the Waze API and receives traffic data from Waze Connected Citizens Program Feeds.</description>
+      <properties>
+        <advanced>
+          <property label="URL Proxy" name="clientURLProxy" source="transport" />
+          <property default="false" label="Use URL Proxy" name="useClientURLProxy" source="transport" />
+          <property label="Parameters" name="clientParameters" source="transport" />
+        </advanced>
+        <hidden>
+          <property default="CLIENT" label="Mode" name="mode" source="transport" />
+          <property default="GET" label="HTTP Method" name="httpMethod" source="transport" />
+          <property default="application/x-www-form-urlencoded" label="Post body MIME Type" name="postContentType" source="transport" />
+          <property default="application/json" label="Acceptable MIME Types (Client Mode)" name="acceptableMimeTypesClientMode" source="transport" />
+          <property label="Content Body" name="clientPostBody" source="transport" />
+          <property default="false" label="Use Long Polling" name="useLongPolling" source="transport" />
+          <property label="Acceptable MIME Types (Server Mode)" name="acceptableMimeTypesServerMode" source="transport" />
+        </hidden>
+        <shown>
+          <property default="https://na-georss.waze.com/rtserver/web/TGeoRSS" label="URL" name="clientURL" source="transport" />
+          <property default="" label="Waze CCP Token" name="token" source="transport" />
+          <property default="" label="Waze CCP Partner Name" name="username" source="transport" />
+          <property default="alerts,traffic" label="Data Types" name="types" source="transport" />
+          <property default="-118.981886,34.37344;-117.763602,34.37344;-117.763602,33.62391;-118.981886,33.62391;-118.981886,34.37344" label="Area of Interest" name="aoi" source="transport" />
+          <property default="120" label="Frequency (in seconds)" name="frequency" source="transport" />
+        </shown>
+      </properties>
+      <transport uri="com.esri.geoevent.transport.inbound/Waze/10.5.0" />
+    </connector>
+    <connector accessType="editable" label="Push Message Formatter Output via POST" name="esri-messageformatter-http-external-out" type="outbound">
+      <adapter uri="com.esri.ges.adapter.outbound/MessageFormatter/10.6.0" />
+      <defaultName>http-message-out</defaultName>
+      <description>Pushes GeoEvents as a Formatted Message to an external website using the POST method.</description>
+      <properties>
+        <advanced />
+        <hidden />
+        <shown>
+          <property default="Enter Message Body Here" label="Message" name="textMessage" source="adapter" />
+          <property label="URL" name="clientURL" source="transport" />
+          <property default="false" label="Use URL Proxy" name="useClientURLProxy" source="transport" />
+          <property label="URL Proxy" name="clientURLProxy" source="transport" />
+          <property label="Parameters" name="clientParameters" source="transport" />
+          <property default="POST" label="HTTP Method" name="httpMethod" source="transport" />
+          <property default="name:value" label="Header Parameter Name:Value List" name="headers" source="transport" />
+          <property label="Post/Put body MIME Type" name="postContentType" source="transport" />
+          <property label="Acceptable MIME Types" name="acceptableMimeTypesClientMode" source="transport" />
+          <property default="SERVER" label="Mode" name="mode" source="transport" />
+          <property default="30" label="HTTP Timeout (in seconds)" name="httpTimeoutValue" source="transport" />
+        </shown>
+      </properties>
+      <transport uri="com.esri.ges.transport.outbound/HTTP/10.6.0" />
+    </connector>
+  </connectors>
+</template>
